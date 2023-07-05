@@ -16,7 +16,6 @@ public class Animation : MonoBehaviour
     void Update()
     {
         if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D))// もしWSADキーのいずれかが押されたら、
-
         {
             anim.SetBool("isRunning", true);// AnimatorのisRunningをtrueにする
         }
