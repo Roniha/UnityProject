@@ -1,36 +1,39 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
+[RequireComponent(typeof(NavMeshAgent))]
 public class anime : MonoBehaviour
 {
-    private Animator anim; // Animatorを使うための変数
-    private float originalX; // 初期のx座標を保存するための変数
-    private float distance = 5.0f; // 左右する距離
-    private float speed = 2.0f; // 左右するスピード
+    [SerializeField]
+    [Tooltip("巡回する地点の配列")]
+    private Transform[] Waypoints;
 
-    // Start is called before the first frame update
-    void Start()
+    private NavMeshAgent navMeshAgent;
+    private Animator anim;
+    private int currentWaypointIndex;
+
+    private void Start()
     {
-        anim = GetComponent<Animator>(); // animにAnimatorの値を取得して代入
-        anim.SetBool("isWalking", true); // AnimatorのisWalkingをtrueにする
-        originalX = transform.position.x; // originalXに現在のx座標を保存
-        transform.Rotate(0, 90, 0);
+        navMeshAgent = GetComponent<NavMeshAgent>();
+        anim = GetComponent<Animator>();
+
+        // 最初のWaypointに向かって移動
+        currentWaypointIndex = 0;
+        navMeshAgent.SetDestination(Waypoints[currentWaypointIndex].position);
     }
 
-    // Update is called once per frame
-    void Update()
-    {   
-        transform.position += transform.forward * 0.04f; // 前方に進む
-
-        // 現在のx座標がoriginalXからdistance分以上離れた場合、または0以下の場合に90度回転
-        if (transform.position.x <= 0 || transform.position.x >= originalX + distance)
+    private void Update()
+    {
+        if (navMeshAgent.remainingDistance <= navMeshAgent.stoppingDistance)
         {
-            // 90度回転させる
-            transform.Rotate(0, 180, 0);
-
-            // 新しいx座標をoriginalXとして保存
-            originalX = transform.position.x;
+            // 次のWaypointのインデックスに切り替える
+            currentWaypointIndex = (currentWaypointIndex + 1) % Waypoints.Length;
+            navMeshAgent.SetDestination(Waypoints[currentWaypointIndex].position);
         }
+
+        // 設定した条件に応じてアニメーションを制御
+        anim.SetFloat("Speed", navMeshAgent.velocity.magnitude);
     }
 }
